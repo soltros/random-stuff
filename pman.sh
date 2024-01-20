@@ -1,4 +1,4 @@
-sudo apt install curl
+sudo apt install curl uidmap
 
 curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sh -s -- --prefix ~/.local
 
