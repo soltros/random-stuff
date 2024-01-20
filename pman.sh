@@ -12,6 +12,6 @@ echo "export PATH=$HOME/.local/podman/bin:$PATH" >> ~/.bashrc
 
 echo "xhost +si:localuser:$USER" >> ~/.bashrc
 
-echo "alias='cd ~/.local/bin/;./distrobox'" >> ~/.bashrc
+echo "alias distrobox='cd ~/.local/bin/;./distrobox'" >> ~/.bashrc
 
 source ~/.bashrc
