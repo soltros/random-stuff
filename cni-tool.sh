@@ -36,6 +36,24 @@ rm /tmp/cni-plugins.tgz
 ## Define path in bashrc
 echo "export CNI_PATH=/opt/cni/bin" >> ~/.bashrc
 
+# Add or update cron job to ensure cniVersion remains "1.0.0"
+
+CRON_JOB="@hourly for FILE in /home/derrik/.config/cni/net.d/*.conflist; do sudo sed -i 's/\"cniVersion\": \"1.0.0\"/\"cniVersion\": \"0.4.0\"/g' \$FILE; done"
+
+# Write out current crontab to a temporary file
+crontab -l > mycron
+
+# Echo new cron job into the cron file, removing any old job related to this script
+grep -v 'cniVersion' mycron > mycron.tmp && mv mycron.tmp mycron
+echo "$CRON_JOB" >> mycron
+
+# Install new cron jobs from the file
+crontab mycron
+rm mycron
+
+echo "Cron job added to maintain cniVersion at 1.0.0"
+
+
 # Define the directory containing CNI config files
 CNI_CONFIG_DIR="/home/derrik/.config/cni/net.d/"
 
