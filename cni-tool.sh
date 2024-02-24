@@ -1,58 +1,36 @@
 #!/bin/bash
 
-# Update and install Podman and CNI plugins
-sudo apt update
-sudo apt -y install podman containernetworking-plugins
+# Define the version of CNI plugins to install
+CNI_PLUGINS_VERSION="v1.4.0"
 
-# Define CNI network configuration directory and file
-CNI_CONFIG_DIR="/etc/cni/net.d"
-CNI_CONFIG_FILE="${CNI_CONFIG_DIR}/87-podman-bridge.conflist"
+# Define the download URL
+CNI_PLUGINS_URL="https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-amd64-${CNI_PLUGINS_VERSION}.tgz"
 
-# Check if the CNI network configuration directory exists
-if [ ! -d "$CNI_CONFIG_DIR" ]; then
-    echo "Creating CNI configuration directory..."
-    sudo mkdir -p "$CNI_CONFIG_DIR"
+# Define the target directory for CNI plugins
+CNI_TARGET_DIR="/opt/cni/bin"
+
+echo "Downloading CNI plugins version ${CNI_PLUGINS_VERSION}..."
+wget -O /tmp/cni-plugins.tgz "${CNI_PLUGINS_URL}"
+
+if [ $? -ne 0 ]; then
+    echo "Failed to download CNI plugins."
+    exit 1
 fi
 
-# Check if the CNI network configuration file already exists
-if [ ! -f "$CNI_CONFIG_FILE" ]; then
-    echo "Creating default Podman bridge network configuration..."
-    # Create a default bridge network configuration
-    sudo tee "$CNI_CONFIG_FILE" > /dev/null <<EOL
-{
-    "cniVersion": "0.4.0",
-    "name": "podman",
-    "plugins": [
-        {
-            "type": "bridge",
-            "bridge": "cni-podman0",
-            "isGateway": true,
-            "ipMasq": true,
-            "ipam": {
-                "type": "host-local",
-                "routes": [
-                    { "dst": "0.0.0.0/0" }
-                ],
-                "ranges": [
-                    [{ "subnet": "10.88.0.0/16" }]
-                ]
-            }
-        },
-        {
-            "type": "portmap",
-            "capabilities": {
-                "portMappings": true
-            }
-        }
-    ]
-}
-EOL
+echo "Creating target directory at ${CNI_TARGET_DIR}..."
+sudo mkdir -p "${CNI_TARGET_DIR}"
+
+echo "Extracting CNI plugins to ${CNI_TARGET_DIR}..."
+sudo tar -xvzf /tmp/cni-plugins.tgz -C "${CNI_TARGET_DIR}"
+
+if [ $? -eq 0 ]; then
+    echo "CNI plugins have been installed successfully."
 else
-    echo "Podman CNI network configuration already exists."
+    echo "Failed to extract CNI plugins."
+    exit 1
 fi
 
-# Restart Podman service (useful if already installed)
-echo "Restarting Podman service to apply changes..."
-systemctl restart podman
+# Cleanup
+rm /tmp/cni-plugins.tgz
 
-echo "Podman and CNI setup is complete."
+echo "Installation completed. CNI plugins are located in ${CNI_TARGET_DIR}"
