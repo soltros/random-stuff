@@ -49,19 +49,36 @@ done
 
 echo "CNI plugin installation and configuration update complete. CNI plugins are located in ${CNI_TARGET_DIR}"
 
-# Add or update cron job to ensure cniVersion remains "0.4.0" in all .conflist files, running every 10 minutes
-CRON_JOB="*/10 * * * * for DIR in /home/derrik/.config/cni/net.d/ ~/.config/net.d/; do for FILE in \$DIR*.conflist; do sudo sed -i 's/\"cniVersion\": \"1.0.0\"/\"cniVersion\": \"0.4.0\"/g' \$FILE; done; done"
+# Create and enable systemd service and timer for regular updates
 
-# Add logging to the cron job for easier debugging
-CRON_JOB_LOGGED="$CRON_JOB >> /var/log/cni_cron.log 2>&1"
+# Service file content
+SERVICE_FILE_CONTENT="[Unit]
+Description=Update CNI Configurations to version 0.4.0
 
-# Use a temp file to safely edit crontab
-TEMP_CRON_FILE=$(mktemp)
-crontab -l > "$TEMP_CRON_FILE" 2>/dev/null || true # Suppress errors if no crontab exists
-# Ensure the cron job is not duplicated
-grep -Fv "cniVersion" "$TEMP_CRON_FILE" > "${TEMP_CRON_FILE}_tmp" && mv "${TEMP_CRON_FILE}_tmp" "$TEMP_CRON_FILE"
-echo "$CRON_JOB_LOGGED" >> "$TEMP_CRON_FILE"
-crontab "$TEMP_CRON_FILE"
-rm "$TEMP_CRON_FILE"
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'for DIR in /home/derrik/.config/cni/net.d/ ~/.config/net.d/; do for FILE in \$DIR*.conflist; do sudo sed -i \"s/\\\"cniVersion\\\": \\\"1.0.0\\\"/\\\"cniVersion\\\": \\\"0.4.0\\\"/g\" \$FILE; done; done'
 
-echo "Cron job added to maintain cniVersion at 0.4.0 in all .conflist files every 10 minutes and logged to /var/log/cni_cron.log"
+[Install]
+WantedBy=multi-user.target"
+
+# Timer file content
+TIMER_FILE_CONTENT="[Unit]
+Description=Timer to regularly update CNI configurations
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+
+[Install]
+WantedBy=timers.target"
+
+# Create service and timer files
+echo "$SERVICE_FILE_CONTENT" | sudo tee /etc/systemd/system/update_cni.service > /dev/null
+echo "$TIMER_FILE_CONTENT" | sudo tee /etc/systemd/system/update_cni.timer > /dev/null
+
+# Reload systemd, enable and start timer
+sudo systemctl daemon-reload
+sudo systemctl enable --now update_cni.timer
+
+echo "Systemd timer created and started to maintain cniVersion at 0.4.0 in all .conflist files every 10 minutes."
