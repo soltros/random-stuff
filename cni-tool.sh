@@ -30,7 +30,7 @@ if ! grep -q 'export CNI_PATH=/opt/cni/bin' ~/.bashrc; then
 fi
 
 # Define the directories containing CNI config files
-CNI_CONFIG_DIRS=("/home/derrik/.config/cni/net.d/" "~/.config/net.d/")
+CNI_CONFIG_DIRS=("/home/derrik/.config/cni/net.d/" "~/.config/cni/net.d/")
 
 # Correct the CNI version in config files to avoid plugin compatibility issues
 for CNI_CONFIG_DIR in "${CNI_CONFIG_DIRS[@]}"; do
