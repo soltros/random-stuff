@@ -57,7 +57,7 @@ Description=Update CNI Configurations to version 0.4.0
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'for DIR in /home/derrik/.config/cni/net.d/ ~/.config/net.d/; do for FILE in \$DIR*.conflist; do sudo sed -i \"s/\\\"cniVersion\\\": \\\"1.0.0\\\"/\\\"cniVersion\\\": \\\"0.4.0\\\"/g\" \$FILE; done; done'
+ExecStart=/bin/bash -c 'for DIR in /home/derrik/.config/cni/net.d/ ~/.config/cni/net.d/; do for FILE in \$DIR*.conflist; do sudo sed -i \"s/\\\"cniVersion\\\": \\\"1.0.0\\\"/\\\"cniVersion\\\": \\\"0.4.0\\\"/g\" \$FILE; done; done'
 
 [Install]
 WantedBy=multi-user.target"
