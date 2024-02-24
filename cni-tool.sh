@@ -33,4 +33,29 @@ fi
 # Cleanup
 rm /tmp/cni-plugins.tgz
 
-echo "Installation completed. CNI plugins are located in ${CNI_TARGET_DIR}"
+## Define path in bashrc
+echo "export CNI_PATH=/opt/cni/bin" >> ~/.bashrc
+
+# Define the directory containing CNI config files
+CNI_CONFIG_DIR="/home/derrik/.config/cni/net.d/"
+
+# Define the old and new CNI version values
+OLD_CNI_VERSION="\"cniVersion\": \"1.0.0\""
+NEW_CNI_VERSION="\"cniVersion\": \"0.4.0\""
+
+# Check if the CNI configuration directory exists
+if [ -d "$CNI_CONFIG_DIR" ]; then
+    echo "Updating CNI configuration files in $CNI_CONFIG_DIR..."
+    
+    # Find and update CNI version in all .conflist files in the directory
+    for FILE in ${CNI_CONFIG_DIR}*.conflist; do
+        if grep -q "$OLD_CNI_VERSION" "$FILE"; then
+            echo "Updating cniVersion in $FILE to 0.4.0..."
+            sudo sed -i "s/$OLD_CNI_VERSION/$NEW_CNI_VERSION/g" "$FILE"
+        fi
+    done
+else
+    echo "CNI configuration directory $CNI_CONFIG_DIR does not exist. Skipping version update."
+fi
+
+echo "CNI plugin installation and configuration update complete. CNI plugins are located in ${CNI_TARGET_DIR}"
