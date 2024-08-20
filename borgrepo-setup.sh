@@ -31,7 +31,8 @@ echo "encryption = repokey" | sudo tee -a /etc/borg.conf
 
 # Step 5: Test BorgBackup
 echo "Step 5: Test BorgBackup"
-sudo borg create --stats --list "$repo_folder::test"
+read -p "Enter the path to the files or directories you want to back up (e.g. /home/pi/Documents): " backup_path
+sudo borg create --stats --list "$repo_folder::test" "$backup_path"
 
 # Step 6: Schedule regular backups
 echo "Step 6: Schedule regular backups"
@@ -39,7 +40,7 @@ read -p "Do you want to schedule regular backups? (y/n): " schedule_backups
 if [ "$schedule_backups" = "y" ]; then
   read -p "Enter the frequency of the backups (e.g. daily, weekly, monthly): " frequency
   sudo crontab -e
-  echo "0 2 * * * borg create --stats --list $repo_folder::$frequency" | sudo tee -a /etc/crontab
+  echo "0 2 * * * borg create --stats --list $repo_folder::$frequency $backup_path" | sudo tee -a /etc/crontab
 fi
 
 echo "Congratulations! Your BorgBackup repository is now set up."
