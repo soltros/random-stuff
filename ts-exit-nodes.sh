@@ -47,7 +47,7 @@ execute_command() {
             ;;
         3)
             echo -e "${BLUE}RPi Server exit node (VPN):${NC}"
-            sudo tailscale set --exit-node=ts-rpi
+            sudo tailscale set --exit-node=pi4-nixos-server
             ;;
         4)
             echo -e "${BLUE}NixOS Data Server Exit node:${NC}"
