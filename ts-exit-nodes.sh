@@ -31,6 +31,15 @@ draw_menu() {
     echo -n "Please select an option: "
 }
 
+# Validate IP address function
+validate_ip() {
+    if [[ $1 =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Execute command function
 execute_command() {
     clear_screen
@@ -39,31 +48,35 @@ execute_command() {
     case $1 in
         1)
             echo -e "${BLUE}System Information:${NC}"
-            curl ipinfo.io
+            curl ipinfo.io || echo -e "${RED}Error fetching IP information${NC}"
             ;;
         2)
             echo -e "${BLUE}NixOS Exit node:${NC}"
-            sudo tailscale set --exit-node=nixos-server
+            ip="100.85.114.72"
+            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         3)
-            echo -e "${BLUE}RPi Server exit node (VPN):${NC}"
-            sudo tailscale set --exit-node=pi4-nixos-server
+            echo -e "${BLUE}RPi4 NixOS Server exit node:${NC}"
+            ip="100.75.134.115"
+            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         4)
             echo -e "${BLUE}NixOS Data Server Exit node:${NC}"
-            sudo tailscale set --exit-node="nixos-data-server"
+            ip="100.66.117.110"
+            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         5)
             echo -e "${BLUE}Disconnect from Tailscale exit node:${NC}"
-            sudo tailscale set --exit-node=""
+            sudo tailscale set --exit-node="" || echo -e "${RED}Error disconnecting from exit node${NC}"
             ;;
         6)
             echo -e "${BLUE}Route all traffic through the node:${NC}"
-            sudo tailscale set --exit-node-allow-lan-access=true
+            read -p "Enter exit node IP: " ip
+            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         7)
             echo -e "${BLUE}Show Tailscale online devices:${NC}"
-            tailscale status | grep -v offline
+            tailscale status | grep -v offline || echo -e "${RED}Error fetching online devices${NC}"
             ;;
         *)
             echo -e "${RED}Invalid option${NC}"
@@ -79,14 +92,14 @@ while true; do
     clear_screen
     draw_menu
     read -r choice
-    
+
     if [[ $choice == "q" ]]; then
         clear_screen
         echo -e "${GREEN}Goodbye!${NC}"
         exit 0
     fi
-    
-    if [[ $choice =~ ^[1-6]$ ]]; then
+
+    if [[ $choice =~ ^[1-7]$ ]]; then
         execute_command "$choice"
     else
         echo -e "${RED}Invalid option. Press Enter to continue...${NC}"
