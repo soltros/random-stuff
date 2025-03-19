@@ -14,20 +14,21 @@ def get_user_root_path(user):
     }
     return user_paths.get(user, "/music/")
 
-def generate_m3u(directory, user, output_file="playlist.m3u"):
-    """Generate an M3U playlist file."""
+def generate_m3u(directory, user, subfolder, output_file="playlist.m3u"):
+    """Generate an M3U playlist file with server-side paths."""
     music_files = get_music_files(directory)
     root_path = get_user_root_path(user)
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("#EXTM3U\n")
-        f.write(f"#PLAYLIST:{output_file}\n")
+        f.write(f"#PLAYLIST:{os.path.splitext(output_file)[0]}\n")
 
         for file in music_files:
             file_path = os.path.join(directory, file)
-            duration = 0  # Placeholder for duration (you can use a library like mutagen to get actual duration)
+            duration = 0  # Placeholder for duration (use a library like mutagen to get actual duration)
             f.write(f"#EXTINF:{duration},{os.path.splitext(file)[0]}\n")
-            f.write(f"{root_path}{file}\n")
+            # Write the server-side path, including the subfolder
+            f.write(f"{root_path}{subfolder}/{file}\n")
 
 def main():
     # Ask for the directory containing music files
@@ -42,9 +43,15 @@ def main():
         print("Invalid user. Exiting.")
         return
 
+    # Ask for the subfolder name
+    subfolder = input("What is the name of the subfolder for these files? ").strip()
+    if not subfolder:
+        print("Subfolder name cannot be empty. Exiting.")
+        return
+
     # Generate the M3U playlist
     output_file = input("Enter the output M3U file name (default: playlist.m3u): ").strip() or "playlist.m3u"
-    generate_m3u(directory, user, output_file)
+    generate_m3u(directory, user, subfolder, output_file)
     print(f"Playlist generated: {output_file}")
 
 if __name__ == "__main__":
