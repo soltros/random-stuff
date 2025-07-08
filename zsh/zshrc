@@ -107,9 +107,5 @@ export LANG=en_US.UTF-8
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias fastfetch="fastfetch -l linux"
 alias helper="sh /usr/share/soltros/bin/helper.sh"
-<<<<<<< HEAD
 alias nixmanager="sh ~/scripts/nixmanager.sh"
-=======
-alias nix-install="nix profile add nixpkgs#"
-alias nix-remove="nix profile remove"
->>>>>>> 7941194f7e6ea2296f774f852035a373882419b7
+
