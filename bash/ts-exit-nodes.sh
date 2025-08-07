@@ -18,12 +18,10 @@ draw_menu() {
     echo -e "${BLUE}================================${NC}"
     echo
     echo "1) Show IP information"
-    echo "2) Connect to NixOS Server exit node"
-    echo "3) Connect to RPi4 Server exit node (VPN)"
-    echo "4) Connect to NixOS Data Server exit node"
-    echo "5) Disconnect from Exit node entirely"
-    echo "6) Route all traffic through the node"
-    echo "7) Show Tailscale online devices"
+    echo "2) Connect to SoltrOS Server exit node (VPN)"
+    echo "3) Connect to Ubuntu VPS Exit Node (Lansing/No VPN)"
+    echo "4) Disconnect from Exit node entirely"
+    echo "5) Show Tailscale online devices"
     echo "q) Quit"
     echo
     echo -e "${BLUE}================================${NC}"
@@ -51,30 +49,20 @@ execute_command() {
             curl ipinfo.io || echo -e "${RED}Error fetching IP information${NC}"
             ;;
         2)
-            echo -e "${BLUE}NixOS Exit node:${NC}"
-            ip="100.85.114.72"
+            echo -e "${BLUE}SoltrOS Server Exit node:${NC}"
+            ip="100.82.89.54"
             validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         3)
-            echo -e "${BLUE}RPi4 NixOS Server exit node:${NC}"
-            ip="100.75.134.115"
+            echo -e "${BLUE}VPS exit node:${NC}"
+            ip="100.125.225.77"
             validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
             ;;
         4)
-            echo -e "${BLUE}NixOS Data Server Exit node:${NC}"
-            ip="100.66.117.110"
-            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
-            ;;
-        5)
             echo -e "${BLUE}Disconnect from Tailscale exit node:${NC}"
             sudo tailscale set --exit-node="" || echo -e "${RED}Error disconnecting from exit node${NC}"
             ;;
-        6)
-            echo -e "${BLUE}Route all traffic through the node:${NC}"
-            read -p "Enter exit node IP: " ip
-            validate_ip "$ip" && sudo tailscale set --exit-node="$ip" --exit-node-allow-lan-access=true || echo -e "${RED}Invalid IP address${NC}"
-            ;;
-        7)
+        5)
             echo -e "${BLUE}Show Tailscale online devices:${NC}"
             tailscale status | grep -v offline || echo -e "${RED}Error fetching online devices${NC}"
             ;;
